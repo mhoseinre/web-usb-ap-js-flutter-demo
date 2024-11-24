@@ -74471,7 +74471,7 @@ $0(){this.a.d=this.b},
 $S:0}
 A.aeD.prototype={
 $0(){var s=this.a,r=s.f,q=r.a.a
-s.r.push(q+" ->>codeUnits :"+A.jv(new A.kJ(q),"[","]"))
+s.r.push(">>> send: "+q+" ->>codeUnits :"+A.jv(new A.kJ(q),"[","]"))
 q=r.a.a
 A.tB("----------------1-------------------")
 $.asR().BB("simpleSendSerialLine",[q+"\n"])
