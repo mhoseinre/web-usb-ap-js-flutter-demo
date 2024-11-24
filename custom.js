@@ -1,140 +1,134 @@
 
 var port, textEncoder, writableStreamClosed, writer, historyIndex = -1;
 var isSend=false;
+var reader;
+// var writer;
 
 
 
 //=========================================================================================
 // my code
-async function getPermition() {
+async function connectToSerial(baudRate) {
   try{
     console.log('>>>getPermition');
     // Prompt user to select any serial port.
     port = await navigator.serial.requestPort();
     // Wait for the serial port to open.
-   await port.open({ baudRate: 9600 });
+   await port.open({ baudRate: baudRate});
    console.log('>>>serial port is open');
    console.log('====================================================');
 
+   const decoder = new TextDecoderStream();
+        const encoder = new TextEncoderStream();
 
+        port.readable.pipeTo(decoder.writable);
+        reader = decoder.readable.getReader();
+
+        writer = encoder.writable.getWriter();
+        console.log("Connected to the serial port!");
     //Reading data from a port
-    await listenToPort();
-
-
-
+    // await listenToPort();
+    return "Connected to the serial port!";
   }catch(e){
     alert("Serial Connection Failed" + e);
-
+    return `Connection failed: ${e.message}`
   }
-
-
   }
+  window.connectToSerial=connectToSerial;
 
-  async function listenToPort() {
-    console.log('>>> listenToPort run');
-    const reader = port.readable.getReader();
-    var result=[];
-
-    // Listen to data coming from the serial device.
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) {
-        // Allow the serial port to be closed later.
-        reader.releaseLock();
-        break;
-      }
-      // value is a Uint8Array.
-      console.log('___1___');
-      
-      console.log(value);
-      console.log('___2___');
-
-      result = Object.values(value);
-      console.log(result);
-      
-      console.log('___3___');
-
-      var string = String.fromCharCode.apply(null, value);
-      console.log('>>>>string: '+ string);
-      
-
-        // appendToTerminal(value);
-
+  async function readFromSerial() {
+    console.log('>>>>readFromSerial');
+    // const reader = port.readable.getReader();
+    try {
+        if (reader) {
+            const { value, done } = await reader.read();
+            if (done) {
+                reader.releaseLock();
+                return null;
+            }
+            return value;
+        }
+    } catch (error) {
+        return `Error reading data: ${error.message}`;
     }
-    
-  
-  }
-   function appendToTerminal(obj) {
-    console.log('##################################################');
-    console.log('in appendToTerminal ');
-    // console.log('#1');
-    var result=[];
-    result = Object.values(obj);
-
-  //   let str = '';
-  //   for (const [p, val] of Object.entries(obj)) {
-  //        result.push(val);
-  //   console.log(result);
-  //       str += `${p}::${val}\n`;
-  //   }
-  //   console.log(str);
-
-  //   console.log('#2');
-  //  var a= String(obj);
-  //   console.log(a);
-    
-    // console.log('#3');
-    
-    result.forEach(function(entry) {
-      console.log(entry);
-    });
-
-refreshScreen();
-    return result;
-    
-
 }
 
+ 
 
 
-  async function simpleSendSerialLine ( Text ) {
-    var  sendData= Text;
+
+
+//    function appendToTerminal(obj) {
+//     console.log('##################################################');
+//     console.log('in appendToTerminal ');
+//     // console.log('#1');
+//     var result=[];
+//     result = Object.values(obj);
+
+//   //   let str = '';
+//   //   for (const [p, val] of Object.entries(obj)) {
+//   //        result.push(val);
+//   //   console.log(result);
+//   //       str += `${p}::${val}\n`;
+//   //   }
+//   //   console.log(str);
+
+//   //   console.log('#2');
+//   //  var a= String(obj);
+//   //   console.log(a);
+    
+//     // console.log('#3');
+    
+//     result.forEach(function(entry) {
+//       console.log(entry);
+//     });
+
+// refreshScreen();
+//     return result;
+    
+
+// }
+
+
+
+//   async function simpleSendSerialLine ( Text ) {
+//     var  sendData= Text;
   
-    console.log('-------------2----------------');
-    // const writer = port.writable.getWriter();
-    // const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
-    // await writer.write(data);
-    // // Allow the serial port to be closed later.
-    // writer.releaseLock();
-console.log(sendData);
+//     console.log('-------------2----------------');
+//     // const writer = port.writable.getWriter();
+//     // const data = new Uint8Array([104, 101, 108, 108, 111]); // hello
+//     // await writer.write(data);
+//     // // Allow the serial port to be closed later.
+//     // writer.releaseLock();
+// console.log(sendData);
 
-const encoder = new TextEncoder();
-const writer = port.writable.getWriter();
+// const encoder = new TextEncoder();
+// const writer = port.writable.getWriter();
 
-var a =[];
-a=encoder.encode(sendData);
-a.forEach(function(entry) {
-  console.log(entry);
-});
-console.log('-------------3----------------');
+// var a =[];
+// a=encoder.encode(sendData);
+// a.forEach(function(entry) {
+//   console.log(entry);
+// });
+// console.log('-------------3----------------');
 
-await writer.write(encoder.encode(sendData));
+// await writer.write(encoder.encode(sendData));
 
-writer.releaseLock();
+// writer.releaseLock();
 
 
   
     
-  }
-    function sendToFlutter(result) {
-    // let result=[115,97,108,97,109];
-    return result;
-  }
+//   }
+//     function sendToFlutter(result) {
+//     // let result=[115,97,108,97,109];
+//     return result;
+//   }
 
-  function refreshScreen(){
-    // var a =true;
-    return true
-  }
+//   function refreshScreen(){
+//     // var a =true;
+//     return true
+//   }
   
 
   //------------------------------------------------
@@ -202,3 +196,4 @@ writer.releaseLock();
 
   
 // }
+
